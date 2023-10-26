@@ -1,35 +1,69 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { Component } from 'react';
+import FormSearch from './components/FormSearch/FormSearch';
+import Cards from './components/Cards/Cards';
 import './App.css';
+import { getArtworks } from './utils/api';
+import { IArtworksResponse, IArtwork } from './types/interfaces';
 
-function App() {
-  const [count, setCount] = useState(0);
+interface IAppProps {}
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+interface IAppState {
+  data: IArtwork[];
+}
+
+class App extends Component<IAppProps, IAppState> {
+  constructor(props: IAppProps) {
+    super(props);
+
+    this.state = {
+      data: [
+        {
+          id: 1,
+          link: '',
+          title: '',
+          date: '',
+          author: '',
+          description: '',
+        },
+      ],
+    };
+  }
+
+  componentDidMount() {
+    this.handleGetArtworks();
+  }
+
+  handleGetArtworks = () => {
+    getArtworks().then((res: IArtworksResponse) => {
+      if (res.data) {
+        const array: IArtwork[] = res.data
+          .filter((item) => item.description)
+          .map((item) => ({
+            id: item.id,
+            link: item.api_link,
+            title: item.title,
+            date: item.date_display,
+            author: item.artist_display,
+            description: item.description,
+          }));
+
+        this.setState({
+          data: array,
+        });
+      }
+      console.log(res);
+    });
+  };
+
+  render() {
+    return (
+      <>
+        <h1>ArtWorks</h1>
+        <FormSearch />
+        <Cards data={this.state.data} />
+      </>
+    );
+  }
 }
 
 export default App;
