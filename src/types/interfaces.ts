@@ -146,6 +146,43 @@ export interface IArtworksResponse {
   };
 }
 
+export interface IArtworkSearchResponse {
+  _score: number;
+  thumbnail: {
+    alt_text: string;
+    width: number;
+    lqip: string;
+    height: number;
+  };
+  api_model: string;
+  is_boosted: boolean;
+  api_link: string;
+  id: number;
+  title: string;
+  timestamp: string;
+}
+
+export interface IArtworksSearchResponse {
+  preference: null;
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    total_pages: number;
+    current_page: number;
+  };
+  data: IArtworkSearchResponse[];
+  info: {
+    license_text: string;
+    license_links: string[];
+    version: string;
+  };
+  config: {
+    iiif_url: string;
+    website_url: string;
+  };
+}
+
 export interface IArtwork {
   id: number;
   link: string;
@@ -153,4 +190,5 @@ export interface IArtwork {
   date: string;
   author: string;
   description: string;
+  imageId: string;
 }
