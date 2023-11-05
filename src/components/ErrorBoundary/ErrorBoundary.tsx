@@ -2,8 +2,8 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import Modal from '../Modal/Modal';
 
 interface IErrorBoundaryProps {
-  fallback: ReactNode;
-  children: ReactNode;
+  fallback?: ReactNode;
+  children?: ReactNode;
 }
 
 interface IErrorBoundaryState {
