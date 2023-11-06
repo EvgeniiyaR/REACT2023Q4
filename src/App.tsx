@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import FormSearch from './components/FormSearch/FormSearch';
 import Cards from './components/Cards/Cards';
 import './App.css';
@@ -9,12 +10,13 @@ import {
   IArtwork,
 } from './types/interfaces';
 import Loader from './components/Loader/Loader';
+import Pagination from './components/Pagination/Pagination';
+import DetailedCard from './components/DetailedCard/DetailedCard';
 
 const App = () => {
   const [data, setData] = useState([
     {
       id: 1,
-      link: '',
       title: '',
       date: '',
       author: '',
@@ -23,58 +25,103 @@ const App = () => {
     },
   ]);
   const [search, setSearch] = useState(localStorage.getItem('search') || '');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingDetailedPage, setIsLoadingDetailedPage] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [id, setId] = useState(searchParams.get('details') || '');
+  const [isOpen, setIsOpen] = useState(searchParams.has('details'));
+  const [card, setCard] = useState({
+    id: 1,
+    title: '',
+    date: '',
+    author: '',
+    description: '',
+    imageId: '',
+  });
 
   useEffect(() => {
     if (search) {
-      handleSubmit(search);
+      handleSubmit(search, limit, page);
     } else {
-      handleGetArtworks();
+      handleGetArtworks(limit, page);
     }
-  }, []);
+  }, [page, limit]);
 
-  const handleGetArtworks = () => {
-    setLoading(true);
-    getArtworks().then((res: IArtworksResponse) => {
+  useEffect(() => {
+    if (Number(id) > 0) {
+      setIsLoadingDetailedPage(true);
+      setIsOpen(searchParams.has('details'));
+      getArtwork(Number(id)).then((res) => {
+        setCard({
+          id: res.data.id,
+          title: res.data.title,
+          date: res.data.date_display,
+          author: res.data.artist_display,
+          description: res.data.description,
+          imageId: res.data.image_id,
+        });
+        setIsLoadingDetailedPage(false);
+      });
+    }
+  }, [id]);
+
+  const handleGetArtworks = (limit: number, page: number) => {
+    setIsLoading(true);
+    getArtworks(limit, page).then((res: IArtworksResponse) => {
       if (res.data) {
         const array: IArtwork[] = res.data.map((item) => ({
           id: item.id,
-          link: item.api_link,
           title: item.title,
           date: item.date_display,
           author: item.artist_display,
           description: item.description,
           imageId: item.image_id,
         }));
-        setLoading(false);
+        setIsLoading(false);
         setData(array);
+        setSearchParams({
+          limit: limit.toString(),
+          page: page.toString(),
+        });
       }
+      setTotalPages(res.pagination.total_pages);
     });
   };
 
-  const handleSubmit = (newValue: string) => {
-    setLoading(true);
+  const handleSubmit = (newValue: string, limit: number, page: number) => {
+    setIsLoading(true);
     if (newValue) {
-      getArtworksSearch(newValue).then((res: IArtworksSearchResponse) => {
-        if (res.data) {
-          const arrayLink = res.data.map((item) => getArtwork(item.api_link));
-          Promise.all(arrayLink).then((res) => {
-            const array: IArtwork[] = res.map((item) => ({
-              id: item.data.id,
-              link: item.data.api_link,
-              title: item.data.title,
-              date: item.data.date_display,
-              author: item.data.artist_display,
-              description: item.data.description,
-              imageId: item.data.image_id,
-            }));
-            setLoading(false);
-            setData(array);
+      getArtworksSearch(newValue, limit, page).then(
+        (res: IArtworksSearchResponse) => {
+          if (res.data) {
+            const arrayLink = res.data.map((item) => getArtwork(item.id));
+            Promise.all(arrayLink).then((res) => {
+              const array: IArtwork[] = res.map((item) => ({
+                id: item.data.id,
+                link: item.data.api_link,
+                title: item.data.title,
+                date: item.data.date_display,
+                author: item.data.artist_display,
+                description: item.data.description,
+                imageId: item.data.image_id,
+              }));
+              setIsLoading(false);
+              setData(array);
+            });
+          }
+          setTotalPages(res.pagination.total_pages);
+          setSearchParams({
+            search: newValue,
+            limit: limit.toString(),
+            page: page.toString(),
           });
         }
-      });
+      );
     } else {
-      handleGetArtworks();
+      handleGetArtworks(limit, page);
     }
   };
 
@@ -82,27 +129,54 @@ const App = () => {
     setSearch(newValue);
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setId('');
+    searchParams.delete('details');
+    setSearchParams(searchParams);
+  };
+
   return (
-    <main className="main">
-      <h1 className="main__title">ArtWorks</h1>
-      <a href="https://api.artic.edu/docs/" target="_blank" rel="noreferrer">
-        Art Institute of Chicago API
-      </a>
-      <FormSearch
-        search={search}
-        updateSearchValue={updateSearchValue}
-        handleSubmit={handleSubmit}
-      />
-      <div className={`${loading ? 'content' : ''}`}>
-        {loading ? (
-          <Loader />
-        ) : data.length > 0 ? (
-          <Cards data={data} />
-        ) : (
-          <p>Nothing was found for the keyword</p>
+    <>
+      <main className="main">
+        <h1 className="main__title">ArtWorks</h1>
+        {totalPages > 1 && (
+          <Pagination
+            totalPages={totalPages}
+            isLoading={isLoading}
+            page={page}
+            setPage={setPage}
+            limit={limit}
+            setLimit={setLimit}
+          />
         )}
-      </div>
-    </main>
+        <a href="https://api.artic.edu/docs/" target="_blank" rel="noreferrer">
+          Art Institute of Chicago API
+        </a>
+        <FormSearch
+          search={search}
+          updateSearchValue={updateSearchValue}
+          handleSubmit={handleSubmit}
+          setLimit={setLimit}
+          setPage={setPage}
+        />
+        <div className={`${isLoading ? 'content' : ''}`}>
+          {isLoading ? (
+            <Loader />
+          ) : data.length > 0 ? (
+            <Cards data={data} setId={setId} />
+          ) : (
+            <p>Nothing was found for the keyword</p>
+          )}
+        </div>
+      </main>
+      <DetailedCard
+        isOpen={isOpen}
+        handleClose={handleClose}
+        card={card}
+        isLoading={isLoadingDetailedPage}
+      ></DetailedCard>
+    </>
   );
 };
 
