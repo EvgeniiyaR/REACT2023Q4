@@ -1,13 +1,22 @@
+import { useSearchParams } from 'react-router-dom';
 import './Card.css';
 import { IArtwork } from '../../types/interfaces';
 import notFoundImage from '../../assets/notfound.jpg';
 
 interface ICardProps {
   item: IArtwork;
+  setId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Card = ({ item }: ICardProps) => {
-  const { title, imageId, description, author, date } = item;
+const Card = ({ item, setId }: ICardProps) => {
+  const { id, title, imageId, description, author, date } = item;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleClick = () => {
+    searchParams.set('details', id.toString());
+    setSearchParams(searchParams);
+    setId(id.toString());
+  };
 
   return (
     <div className="card">
@@ -30,6 +39,9 @@ const Card = ({ item }: ICardProps) => {
         <p className="card__author">{author}</p>
         <p className="card__date">{date}</p>
       </div>
+      <button className="card__button" type="button" onClick={handleClick}>
+        More...
+      </button>
     </div>
   );
 };
