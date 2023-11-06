@@ -3,22 +3,27 @@ import notFoundImage from '../../assets/notfound.jpg';
 import { IArtwork } from '../../types/interfaces';
 import Loader from '../Loader/Loader';
 import { MouseEventHandler } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 interface DetailedCardProps {
-  isOpen: boolean;
-  handleClose: () => void;
-  card: IArtwork;
-  isLoading: boolean;
+  isOpen?: boolean;
+  handleClose?: () => void;
+  card?: IArtwork;
+  isLoadingDetailedPage?: boolean;
 }
 
-const DetailedCard = ({
-  isOpen,
-  handleClose,
-  card,
-  isLoading,
-}: DetailedCardProps) => {
+const DetailedCard = () => {
+  const {
+    handleClose,
+    isLoadingDetailedPage,
+    isOpen,
+    card,
+  }: DetailedCardProps = useOutletContext();
+
   const handleOverlayClick: MouseEventHandler<HTMLDivElement> = () => {
-    handleClose();
+    if (handleClose) {
+      handleClose();
+    }
   };
 
   return (
@@ -28,10 +33,10 @@ const DetailedCard = ({
     >
       <div
         className={`detailed-card__container ${
-          isLoading ? 'detailed-card__container_loading' : ''
+          isLoadingDetailedPage ? 'detailed-card__container_loading' : ''
         }`}
       >
-        {!isLoading ? (
+        {!isLoadingDetailedPage ? (
           <>
             <button
               className="detailed-card__button"
@@ -40,25 +45,25 @@ const DetailedCard = ({
             >
               Close
             </button>
-            <h1>{card.title}</h1>
+            <h1>{card && card.title}</h1>
             <img
               className="detailed-card__image"
               src={`${
-                card.imageId
+                card && card.imageId
                   ? `https://www.artic.edu/iiif/2/${card.imageId}/full/200,/0/default.jpg`
                   : notFoundImage
               } `}
-              alt={card.imageId ? card.title : 'Not found'}
+              alt={card && card.imageId ? card.title : 'Not found'}
             />
             <p className="detailed-card__description">
               {' '}
-              {card.description
+              {card && card.description
                 ? card.description.replace(/<[^>]*>/gi, '')
                 : 'There is no description'}
             </p>
             <div className="detailed-card__container-date-author">
-              <p className="detailed-card__author">{card.author}</p>
-              <p className="detailed-card__date">{card.date}</p>
+              <p className="detailed-card__author">{card && card.author}</p>
+              <p className="detailed-card__date">{card && card.date}</p>
             </div>
           </>
         ) : (

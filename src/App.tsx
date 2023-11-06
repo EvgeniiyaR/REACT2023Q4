@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import FormSearch from './components/FormSearch/FormSearch';
+import { Outlet } from 'react-router-dom';
 import Cards from './components/Cards/Cards';
 import './App.css';
 import { getArtworks, getArtworksSearch, getArtwork } from './utils/api';
@@ -11,7 +12,6 @@ import {
 } from './types/interfaces';
 import Loader from './components/Loader/Loader';
 import Pagination from './components/Pagination/Pagination';
-import DetailedCard from './components/DetailedCard/DetailedCard';
 
 const App = () => {
   const [data, setData] = useState([
@@ -170,12 +170,14 @@ const App = () => {
           )}
         </div>
       </main>
-      <DetailedCard
-        isOpen={isOpen}
-        handleClose={handleClose}
-        card={card}
-        isLoading={isLoadingDetailedPage}
-      ></DetailedCard>
+      <Outlet
+        context={{
+          handleClose,
+          isLoadingDetailedPage,
+          isOpen,
+          card,
+        }}
+      />
     </>
   );
 };

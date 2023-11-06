@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 import App from '../App';
+import DetailedCard from '../components/DetailedCard/DetailedCard';
 
 const router = createBrowserRouter([
   {
@@ -10,7 +11,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        // element: <DetailedCard />,
+        element: <DetailedCard />,
       },
     ],
   },
