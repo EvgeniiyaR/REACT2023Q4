@@ -4,13 +4,17 @@ import './FormSearch.css';
 interface IFormSearchProps {
   search: string | '';
   updateSearchValue: (newValue: string) => void;
-  handleSubmit: (newValue: string) => void;
+  handleSubmit: (newValue: string, limit: number, page: number) => void;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  setLimit: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const FormSearch = ({
   search,
   updateSearchValue,
   handleSubmit,
+  setPage,
+  setLimit,
 }: IFormSearchProps) => {
   const [error, setError] = useState(false);
 
@@ -19,7 +23,9 @@ const FormSearch = ({
     const formData = new FormData(event.target as HTMLFormElement);
     const searchValueData = formData.get('search') as string;
     const searchValue = searchValueData.trim();
-    handleSubmit(searchValue);
+    setPage(1);
+    setLimit(20);
+    handleSubmit(searchValue, 20, 1);
     localStorage.setItem('search', searchValue);
   };
 
