@@ -11,20 +11,20 @@ const handleResponse = (res: Response) => {
   return Promise.reject(res);
 };
 
-export const getArtworks = () => {
-  return fetch(`${BASE_URL}?limit=20`, {
+export const getArtworks = (limit = 20, page = 1) => {
+  return fetch(`${BASE_URL}?limit=${limit}&page=${page}`, {
     headers,
   }).then((res) => handleResponse(res));
 };
 
-export const getArtworksSearch = (search: string) => {
-  return fetch(`${BASE_URL}search?q=${search}&limit=20`, {
+export const getArtworksSearch = (search: string, limit = 20, page = 1) => {
+  return fetch(`${BASE_URL}search?q=${search}&limit=${limit}&page=${page}`, {
     headers,
   }).then((res) => handleResponse(res));
 };
 
-export const getArtwork = (link: string) => {
-  return fetch(link, {
+export const getArtwork = (id: number) => {
+  return fetch(`${BASE_URL}${id}`, {
     headers,
   }).then((res) => handleResponse(res));
 };
