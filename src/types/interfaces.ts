@@ -185,7 +185,6 @@ export interface IArtworksSearchResponse {
 
 export interface IArtwork {
   id: number;
-  link: string;
   title: string;
   date: string;
   author: string;
