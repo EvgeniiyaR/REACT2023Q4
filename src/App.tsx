@@ -24,14 +24,16 @@ const App = () => {
       imageId: '',
     },
   ]);
-  const [search, setSearch] = useState(localStorage.getItem('search') || '');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(
+    searchParams.get('search') || localStorage.getItem('search') || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDetailedPage, setIsLoadingDetailedPage] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [id, setId] = useState(searchParams.get('details') || '');
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
+  const [limit, setLimit] = useState(Number(searchParams.get('limit')) || 20);
+  const [id, setId] = useState(Number(searchParams.get('details')) || 0);
   const [isOpen, setIsOpen] = useState(searchParams.has('details'));
   const [card, setCard] = useState({
     id: 1,
@@ -51,7 +53,7 @@ const App = () => {
   }, [page, limit]);
 
   useEffect(() => {
-    if (Number(id) > 0) {
+    if (id > 0) {
       setIsLoadingDetailedPage(true);
       setIsOpen(searchParams.has('details'));
       getArtwork(Number(id)).then((res) => {
@@ -86,6 +88,10 @@ const App = () => {
           limit: limit.toString(),
           page: page.toString(),
         });
+        if (id) {
+          searchParams.set('details', id.toString());
+          setSearchParams(searchParams);
+        }
       }
       setTotalPages(res.pagination.total_pages);
     });
@@ -118,6 +124,14 @@ const App = () => {
             limit: limit.toString(),
             page: page.toString(),
           });
+          if (id) {
+            searchParams.set('details', id.toString());
+            setSearchParams(searchParams);
+          }
+          const searchParam = searchParams.get('search');
+          if (localStorage.getItem('search') !== searchParam) {
+            searchParam && localStorage.setItem('search', searchParam);
+          }
         }
       );
     } else {
@@ -131,7 +145,7 @@ const App = () => {
 
   const handleClose = () => {
     setIsOpen(false);
-    setId('');
+    setId(0);
     searchParams.delete('details');
     setSearchParams(searchParams);
   };

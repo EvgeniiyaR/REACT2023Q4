@@ -4,7 +4,7 @@ import Card from '../Card/Card';
 
 interface ICardsProps {
   data: IArtwork[];
-  setId: React.Dispatch<React.SetStateAction<string>>;
+  setId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const Cards = ({ data, setId }: ICardsProps) => {

@@ -5,7 +5,7 @@ import notFoundImage from '../../assets/notfound.jpg';
 
 interface ICardProps {
   item: IArtwork;
-  setId: React.Dispatch<React.SetStateAction<string>>;
+  setId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const Card = ({ item, setId }: ICardProps) => {
@@ -15,7 +15,7 @@ const Card = ({ item, setId }: ICardProps) => {
   const handleClick = () => {
     searchParams.set('details', id.toString());
     setSearchParams(searchParams);
-    setId(id.toString());
+    setId(id);
   };
 
   return (

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent } from 'react';
 import './Pagination.css';
 
 interface PaginationProps {
@@ -20,13 +20,23 @@ const Pagination = ({
   limit,
   setLimit,
 }: PaginationProps) => {
-  const [pageNumbers, setPageNumbers] = useState(
-    totalPages > pageRange ? [1, pageRange] : [1, totalPages]
-  );
+  const calculatePageNumbers = () => {
+    if (totalPages <= pageRange) {
+      return [1, totalPages];
+    }
 
-  useEffect(() => {
-    setPageNumbers(totalPages > pageRange ? [1, pageRange] : [1, totalPages]);
-  }, [totalPages]);
+    if (page <= pageRange - 2) {
+      return [1, pageRange];
+    }
+
+    if (page >= totalPages - (pageRange - 2)) {
+      return [totalPages - (pageRange - 1), totalPages];
+    }
+
+    return [page - (pageRange - 2), page + 1];
+  };
+
+  const pageNumbers = calculatePageNumbers();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const limit = Number(event.target.value);
@@ -45,7 +55,7 @@ const Pagination = ({
             disabled={page === 1}
             onClick={() => {
               setPage(1);
-              setPageNumbers([1, 5]);
+              calculatePageNumbers();
             }}
           >
             {'<<'}
@@ -56,16 +66,7 @@ const Pagination = ({
             className="pagination__button"
             disabled={page === 1}
             onClick={() => {
-              if (
-                page === totalPages ||
-                page === totalPages - 1 ||
-                page === totalPages - 2 ||
-                page === totalPages - 3
-              ) {
-                setPageNumbers([totalPages - 4, totalPages]);
-              } else {
-                setPageNumbers([page - 1, page + 3]);
-              }
+              calculatePageNumbers();
               setPage(page - 1);
             }}
           >
@@ -82,20 +83,7 @@ const Pagination = ({
                 number === page ? 'pagination__button_active' : ''
               }`}
               onClick={() => {
-                if (number === 1) {
-                  setPageNumbers([1, number + 4]);
-                } else if (number === 2) {
-                  setPageNumbers([1, number + 3]);
-                } else if (
-                  number === totalPages ||
-                  number === totalPages - 1 ||
-                  number === totalPages - 2 ||
-                  number === totalPages - 3
-                ) {
-                  setPageNumbers([totalPages - 4, totalPages]);
-                } else {
-                  setPageNumbers([number, number + 4]);
-                }
+                calculatePageNumbers();
                 setPage(number);
               }}
             >
@@ -108,17 +96,7 @@ const Pagination = ({
             className="pagination__button"
             disabled={page === totalPages}
             onClick={() => {
-              if (
-                page === totalPages ||
-                page === totalPages - 1 ||
-                page === totalPages - 2 ||
-                page === totalPages - 3 ||
-                page === totalPages - 4
-              ) {
-                setPageNumbers([totalPages - 4, totalPages]);
-              } else {
-                setPageNumbers([page + 1, page + 5]);
-              }
+              calculatePageNumbers();
               setPage(page + 1);
             }}
           >
@@ -131,7 +109,7 @@ const Pagination = ({
             disabled={page === totalPages}
             onClick={() => {
               setPage(totalPages);
-              setPageNumbers([totalPages - 4, totalPages]);
+              calculatePageNumbers();
             }}
           >
             {'>>'}
